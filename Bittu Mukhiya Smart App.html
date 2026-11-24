@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bittu Mukhiya Smart App</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.22s ease-out;
+        }
+        .tab-content.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes splashZoom {
+            0% { opacity: 0; transform: scale(0.92); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .splash-animate {
+            animation: splashZoom 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes ringPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+        .ringing-card {
+            animation: ringPulse 0.75s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 h-screen w-screen overflow-hidden flex flex-col items-center justify-center">
+
+    <!-- Main Mobile App Container -->
+    <div class="w-full max-w-md h-full sm:h-[94vh] sm:rounded-3xl bg-slate-900 sm:border sm:border-slate-800 shadow-2xl flex flex-col overflow-hidden relative">
+
+        <!-- ==================== 1. SPLASH / WELCOME OVERLAY ==================== -->
+        <div id="splash-screen" class="absolute inset-0 z-50 bg-gradient-to-b from-slate-950 via-indigo-950/90 to-slate-950 backdrop-blur-xl flex flex-col items-center justify-between p-7 text-center transition-opacity duration-500">
+            <div class="mt-4">
+                <span class="px-3.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold tracking-wider uppercase">
+                    Personal Smart Utility
+                </span>
+            </div>
+
+            <div class="splash-animate flex flex-col items-center max-w-xs">
+                <!-- Custom Emblem / Badge -->
+                <div class="relative mb-6">
+                    <div class="absolute -inset-2 rounded-3xl bg-gradient-to-tr from-indigo-500 via-emerald-400 to-cyan-500 opacity-40 blur-lg"></div>
+                    <div class="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-indigo-600 to-emerald-600 p-0.5 shadow-2xl">
+                        <div class="w-full h-full bg-slate-950 rounded-[22px] flex flex-col items-center justify-center">
+                            <span class="text-3xl font-black bg-gradient-to-r from-indigo-400 to-emerald-400 bg-clip-text text-transparent tracking-tighter">BM</span>
+                            <div class="flex gap-1 mt-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-xs font-semibold uppercase tracking-widest text-indigo-300 mb-1">Swagat Hai</p>
+                <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+                    Bittu Mukhiya
+                </h1>
+
+                <!-- Address Card -->
+                <div class="mt-4 px-4 py-2.5 rounded-2xl bg-slate-900/90 border border-slate-700/80 shadow-inner flex items-center gap-2 text-left">
+                    <i data-lucide="map-pin" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                    <span class="text-xs sm:text-sm font-medium text-slate-200 leading-snug">
+                        Moin Mahuaa, Gujrauli, Baheri, Darbhanga
+                    </span>
+                </div>
+
+                <p class="text-xs text-slate-400 mt-4">
+                    Calculator • Alarm Clock • Live GPS Speedometer
+                </p>
+            </div>
+
+            <div class="w-full max-w-xs mb-2">
+                <button onclick="closeSplash()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-emerald-500 hover:opacity-95 active:scale-95 text-white font-bold text-base shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
+                    <span>App Kholo</span>
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </button>
+                <p id="splash-countdown" class="text-[11px] text-slate-500 mt-2">3 second mein apne aap khul jayega...</p>
+            </div>
+        </div>
+
+        <!-- ==================== 2. PERSISTENT TOP HEADER ==================== -->
+        <header class="px-4 pt-3.5 pb-2.5 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-emerald-500 flex items-center justify-center shadow-md shadow-indigo-500/20">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
+                </div>
+                <div>
+                    <h2 class="text-sm font-extrabold tracking-tight text-white leading-none">Smart Helper</h2>
+                    <button onclick="openSplash()" class="text-[10px] text-indigo-400 hover:text-indigo-300 font-medium mt-0.5 flex items-center gap-1">
+                        <i data-lucide="eye" class="w-2.5 h-2.5"></i> Welcome Screen
+                    </button>
+                </div>
+            </div>
+
+            <!-- Glowing Pill Badge for Bittu Mukhiya -->
+            <div class="px-3 py-1.5 rounded-full bg-indigo-500/15 border border-indigo-400/40 shadow-[0_0_15px_rgba(99,102,241,0.3)] flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-xs font-bold text-white tracking-wide">Bittu Mukhiya</span>
+            </div>
+        </header>
+
+        <!-- ==================== TAB 1: CALCULATOR ==================== -->
+        <main id="tab-calc" class="tab-content active flex-1 flex-col justify-between p-3.5 overflow-hidden">
+            <!-- Collapsible History Header & Drawer -->
+            <div class="shrink-0">
+                <div class="flex items-center justify-between mb-1.5">
+                    <button onclick="toggleCalcHistory()" class="text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 bg-slate-800/80 px-2.5 py-1 rounded-lg transition">
+                        <i data-lucide="history" class="w-3.5 h-3.5 text-emerald-400"></i>
+                        <span>Hisab History (<span id="history-count">0</span>)</span>
+                        <i id="history-chevron" data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform"></i>
+                    </button>
+                    <button onclick="clearHistory()" class="text-[11px] text-rose-400 hover:text-rose-300 px-2 py-1 rounded-lg bg-rose-500/10 transition">
+                        Clear
+                    </button>
+                </div>
+
+                <div id="calc-history-box" class="hidden max-h-24 overflow-y-auto no-scrollbar bg-slate-950/90 rounded-xl p-2 mb-2 border border-slate-800 flex flex-col gap-1">
+                    <p class="text-[11px] text-slate-500 italic text-center py-1">Abhi koi hisab save nahi hai</p>
+                </div>
+            </div>
+
+            <!-- Calculator Display -->
+            <div class="bg-slate-950 rounded-2xl p-3.5 mb-2.5 border border-slate-800 flex flex-col justify-end items-end min-h-[96px] shadow-inner shrink-0">
+                <div id="calc-expression" class="text-slate-400 text-xs sm:text-sm font-medium truncate w-full text-right min-h-[20px]"></div>
+                <div id="calc-display" class="text-white text-3xl sm:text-4xl font-extrabold tracking-tight truncate w-full text-right mt-1">0</div>
+            </div>
+
+            <!-- Scientific & Standard Keypad -->
+            <div class="grid grid-cols-4 gap-2 flex-1">
+                <!-- Scientific Extra Row -->
+                <button onclick="calcScientific('sqrt')" class="rounded-xl bg-slate-800/60 hover:bg-slate-700 active:scale-95 text-emerald-400 font-semibold text-xs sm:text-sm transition">√x</button>
+                <button onclick="calcScientific('sq')" class="rounded-xl bg-slate-800/60 hover:bg-slate-700 active:scale-95 text-emerald-400 font-semibold text-xs sm:text-sm transition">x²</button>
+                <button onclick="calcInput('(')" class="rounded-xl bg-slate-800/60 hover:bg-slate-700 active:scale-95 text-slate-300 font-semibold text-sm transition">(</button>
+                <button onclick="calcInput(')')" class="rounded-xl bg-slate-800/60 hover:bg-slate-700 active:scale-95 text-slate-300 font-semibold text-sm transition">)</button>
+
+                <!-- Row 1 -->
+                <button onclick="calcClear()" class="rounded-xl bg-rose-500/15 hover:bg-rose-500/25 active:scale-95 text-rose-400 font-bold text-base transition flex items-center justify-center">AC</button>
+                <button onclick="calcBackspace()" class="rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-amber-400 font-bold transition flex items-center justify-center">
+                    <i data-lucide="delete" class="w-4 h-4"></i>
+                </button>
+                <button onclick="calcInput('%')" class="rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-emerald-400 font-bold text-base transition">%</button>
+                <button onclick="calcInput('/')" class="rounded-xl bg-indigo-600/25 hover:bg-indigo-600/35 active:scale-95 text-indigo-300 font-bold text-lg transition">÷</button>
+
+                <!-- Row 2 -->
+                <button onclick="calcInput('7')" class="rounded-xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white font-semibold text-lg transition">7</button>
+                <button onclick="calcInput('8')" class="rounded-xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white font-semibold text-lg transition">8</button>
+                <button onclick="calcInput('9')" class="rounded-xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white font-semibold text-lg transition">9</button>
+                <button onclick="calcInput('*')" class="rounded-xl bg-indigo-600/25 hover:bg-indigo-600/35 active:scale-95 text-indigo-300 font-bold text-lg transition">×</button>
+
+                <!-- Row 3 -->
+                <button onclick="calcInput('4')" class="rounded-xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white font-semibold text-lg transition">4</button>
+                <button onclick="calcInput('5')" class="rounded-xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white font-semibold text-lg transition">5</button>
+                <button onclick="calcInput('6')" class="rounded-xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white font-semibold text-lg transition">6</button>
+                <button onclick="calcInput('-')" class="rounded-xl bg-indigo-600/25 hover:bg-indigo-600/35 active:scale-95 text-indigo-300 font-bold text-xl transition">−</button>
+
+                <!-- Row 4 -->
+                <button onclick="calcInput('1')" class="rounded-xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white font-semibold text-lg transition">1</button>
+                <button onclick="calcInput('2')" class="rounded-xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white font-semibold text-lg transition">2</button>
+                <button onclick="calcInput('3')" class="rounded-xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white font-semibold text-lg transition">3</button>
+                <button onclick="calcInput('+')" class="rounded-xl bg-indigo-600/25 hover:bg-indigo-600/35 active:scale-95 text-indigo-300 font-bold text-lg transition">+</button>
+
+                <!-- Row 5 -->
+                <button onclick="calcInput('00')" class="rounded-xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-slate-300 font-semibold text-base transition">00</button>
+                <button onclick="calcInput('0')" class="rounded-xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white font-semibold text-lg transition">0</button>
+                <button onclick="calcInput('.')" class="rounded-xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-white font-bold text-lg transition">.</button>
+                <button onclick="calcEquals()" class="rounded-xl bg-gradient-to-r from-indigo-600 to-emerald-500 hover:opacity-95 active:scale-95 text-white font-bold text-xl shadow-lg shadow-indigo-600/25 transition">=</button>
+            </div>
+        </main>
+
+        <!-- ==================== TAB 2: ALARM CLOCK ==================== -->
+        <main id="tab-alarm" class="tab-content flex-1 flex-col p-3.5 overflow-y-auto no-scrollbar">
+            <!-- Live Digital Clock Card -->
+            <div class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950/40 border border-slate-800 rounded-2xl p-4 text-center shadow-lg mb-3 shrink-0 relative">
+                <!-- 12h / 24h Format Toggle -->
+                <button onclick="toggleClockFormat()" id="clock-format-btn" class="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-emerald-400 border border-slate-700 transition">
+                    12H Mode
+                </button>
+                <span class="inline-block px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 text-[11px] font-semibold mb-1">Abhi Ka Time</span>
+                <div class="flex items-baseline justify-center gap-1.5">
+                    <span id="live-clock-time" class="text-4xl font-black tracking-tight text-white tabular-nums">12:00:00</span>
+                    <span id="live-clock-ampm" class="text-sm font-bold text-emerald-400">AM</span>
+                </div>
+                <div id="live-clock-date" class="text-xs text-slate-400 mt-1">Wednesday, 25 Nov 2026</div>
+            </div>
+
+            <!-- Add New Alarm Form -->
+            <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-3 mb-3 shrink-0">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                        <i data-lucide="alarm-clock-plus" class="w-4 h-4 text-emerald-400"></i> Naya Alarm Lagayein
+                    </h3>
+                    <button onclick="testAlarmSound()" class="text-[11px] text-indigo-300 hover:text-white bg-indigo-500/15 px-2 py-0.5 rounded-md flex items-center gap-1">
+                        <i data-lucide="volume-2" class="w-3 h-3"></i> Ringtone Test
+                    </button>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <div class="flex gap-2">
+                        <input type="time" id="alarm-time-input" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold text-base focus:outline-none focus:border-emerald-500">
+                        <button onclick="addAlarm()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-emerald-500 text-white font-bold text-sm active:scale-95 transition shadow-md">
+                            + Set Alarm
+                        </button>
+                    </div>
+                    <input type="text" id="alarm-label-input" placeholder="Kaam likhein (jaise: Subah Uthna, Meeting, Dawai...)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                </div>
+            </div>
+
+            <!-- Saved Alarms List -->
+            <div class="flex items-center justify-between mb-1.5 px-0.5">
+                <span class="text-xs font-semibold text-slate-400">Set Kiye Gaye Alarms (<span id="alarm-count">0</span>)</span>
+                <span class="text-[10px] text-slate-500">Tab khula rakhein</span>
+            </div>
+            <div id="alarm-list" class="flex flex-col gap-2 pb-2">
+                <!-- Alarms populated via JS -->
+            </div>
+        </main>
+
+        <!-- ==================== TAB 3: LIVE GPS SPEEDOMETER ==================== -->
+        <main id="tab-speed" class="tab-content flex-1 flex-col justify-between p-3.5 overflow-y-auto no-scrollbar">
+            <!-- Top Status & Unit Switch -->
+            <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-950 border border-slate-800 text-[11px] font-medium">
+                    <span id="gps-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+                    <span id="gps-status-text" class="text-slate-300">GPS Off</span>
+                    <span id="gps-accuracy-text" class="text-slate-500 hidden"></span>
+                </div>
+                <div class="bg-slate-950 p-0.5 rounded-xl border border-slate-800 flex text-[11px] font-bold">
+                    <button id="unit-kmh" onclick="setSpeedUnit('kmh')" class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white transition">km/h</button>
+                    <button id="unit-mph" onclick="setSpeedUnit('mph')" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition">mph</button>
+                </div>
+            </div>
+
+            <!-- Circular Digital Speedometer Gauge -->
+            <div class="relative flex items-center justify-center my-1">
+                <svg class="w-52 h-52 sm:w-56 sm:h-56 transform -rotate-90" viewBox="0 0 220 220">
+                    <circle cx="110" cy="110" r="92" stroke="#1e293b" stroke-width="14" fill="transparent" stroke-dasharray="433 578" stroke-linecap="round" transform="rotate(-45 110 110)"></circle>
+                    <circle id="speed-arc" cx="110" cy="110" r="92" stroke="url(#bmSpeedGrad)" stroke-width="14" fill="transparent" stroke-dasharray="0 578" stroke-linecap="round" transform="rotate(-45 110 110)" class="transition-all duration-200 ease-out"></circle>
+                    <defs>
+                        <linearGradient id="bmSpeedGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#10b981" />
+                            <stop offset="50%" stop-color="#6366f1" />
+                            <stop offset="100%" stop-color="#f43f5e" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                    <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Live Speed</span>
+                    <span id="speed-value" class="text-5xl font-black text-white tabular-nums tracking-tight my-0.5">0</span>
+                    <span id="speed-unit-label" class="text-xs font-extrabold text-emerald-400">km/h</span>
+                </div>
+            </div>
+
+            <!-- Trip Metrics (Max Speed, Total Distance) -->
+            <div class="grid grid-cols-2 gap-2.5 mb-2.5">
+                <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-2.5 text-center">
+                    <span class="text-[11px] text-slate-400 block">Max Speed</span>
+                    <span id="max-speed-value" class="text-xl font-extrabold text-amber-400 tabular-nums">0</span>
+                    <span class="text-[11px] text-slate-500 unit-mini">km/h</span>
+                </div>
+                <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-2.5 text-center">
+                    <span class="text-[11px] text-slate-400 block">Total Distance</span>
+                    <span id="distance-value" class="text-xl font-extrabold text-emerald-400 tabular-nums">0.00</span>
+                    <span id="dist-unit-mini" class="text-[11px] text-slate-500">km</span>
+                </div>
+            </div>
+
+            <!-- Indoor Test / Demo Slider Mode -->
+            <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-2.5 mb-2.5">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-[11px] font-semibold text-indigo-300 flex items-center gap-1">
+                        <i data-lucide="sliders" class="w-3.5 h-3.5"></i> Ghar Baithe Test Mode (Demo)
+                    </span>
+                    <span id="demo-badge" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">Off</span>
+                </div>
+                <input type="range" id="demo-speed-slider" min="0" max="160" value="0" oninput="handleDemoSlider(this.value)" class="w-full accent-emerald-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+            </div>
+
+            <!-- Start / Stop & Reset Buttons -->
+            <div class="flex gap-2">
+                <button id="toggle-gps-btn" onclick="toggleSpeedTracking()" class="flex-1 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-emerald-500 hover:opacity-95 active:scale-95 text-white font-bold text-sm shadow-lg shadow-indigo-600/20 transition flex items-center justify-center gap-2">
+                    <i data-lucide="navigation" class="w-4 h-4"></i>
+                    <span id="toggle-gps-text">Start Tracking</span>
+                </button>
+                <button onclick="resetTripStats()" title="Reset" class="px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 font-semibold text-sm transition flex items-center justify-center">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </main>
+
+        <!-- ==================== BOTTOM NAVIGATION BAR ==================== -->
+        <nav class="bg-slate-950 border-t border-slate-800 px-3 py-1.5 flex items-center justify-around shrink-0">
+            <button onclick="switchTab('calc')" id="nav-calc" class="nav-btn flex-1 py-1.5 rounded-xl flex flex-col items-center justify-center gap-0.5 text-emerald-400 bg-slate-900 transition">
+                <i data-lucide="calculator" class="w-4 h-4"></i>
+                <span class="text-[11px] font-bold">Calculator</span>
+            </button>
+            <button onclick="switchTab('alarm')" id="nav-alarm" class="nav-btn flex-1 py-1.5 rounded-xl flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-slate-200 transition relative">
+                <i data-lucide="alarm-clock" class="w-4 h-4"></i>
+                <span class="text-[11px] font-bold">Alarm</span>
+                <span id="active-alarm-dot" class="hidden absolute top-1.5 right-8 w-2 h-2 rounded-full bg-rose-500"></span>
+            </button>
+            <button onclick="switchTab('speed')" id="nav-speed" class="nav-btn flex-1 py-1.5 rounded-xl flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-slate-200 transition">
+                <i data-lucide="gauge" class="w-4 h-4"></i>
+                <span class="text-[11px] font-bold">Speedometer</span>
+            </button>
+        </nav>
+
+        <!-- ==================== PERSISTENT FOOTER ==================== -->
+        <footer class="bg-slate-950 border-t border-slate-900 px-3 py-1.5 text-center shrink-0">
+            <p class="text-[10px] sm:text-[11px] font-medium text-slate-400 truncate">
+                Developed for <span class="text-emerald-400 font-bold">Bittu Mukhiya</span> | Moin Mahuaa, Gujrauli, Baheri, Darbhanga
+            </p>
+        </footer>
+
+        <!-- ==================== ALARM RINGING MODAL ==================== -->
+        <div id="alarm-ring-modal" class="hidden absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-lg flex-col items-center justify-center p-6 text-center">
+            <div class="ringing-card w-24 h-24 rounded-full bg-rose-500/20 border-2 border-rose-500 flex items-center justify-center mb-5 shadow-2xl shadow-rose-500/40">
+                <i data-lucide="bell-ring" class="w-12 h-12 text-rose-400"></i>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-xs font-bold uppercase tracking-wider mb-2">Bittu Mukhiya • Alarm</span>
+            <h2 id="ringing-time" class="text-5xl font-black text-white mb-2">07:00 AM</h2>
+            <p id="ringing-label" class="text-base text-slate-300 mb-8">Alarm</p>
+            
+            <div class="flex flex-col w-full gap-3 max-w-xs">
+                <button onclick="stopRingingAlarm()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-rose-600 to-orange-500 text-white font-bold text-lg shadow-lg shadow-rose-600/30 active:scale-95 transition">
+                    Stop
+                </button>
+                <button onclick="snoozeAlarm()" class="w-full py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm active:scale-95 transition">
+                    Snooze (5 min)
+                </button>
+            </div>
+        </div>
+
+        <!-- Toast Banner -->
+        <div id="toast-banner" class="hidden absolute top-16 left-1/2 -translate-x-1/2 z-40 bg-slate-800 border border-slate-700 text-white px-4 py-1.5 rounded-full text-xs font-medium shadow-xl whitespace-nowrap">
+            Notification
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // ==================== 1. SPLASH SCREEN LOGIC ====================
+        let splashTimer = null;
+        function startSplashAutoFade() {
+            clearTimeout(splashTimer);
+            splashTimer = setTimeout(() => {
+                closeSplash();
+            }, 3000);
+        }
+
+        function closeSplash() {
+            clearTimeout(splashTimer);
+            const splash = document.getElementById('splash-screen');
+            splash.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                splash.classList.add('hidden');
+            }, 450);
+        }
+
+        function openSplash() {
+            const splash = document.getElementById('splash-screen');
+            splash.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+            startSplashAutoFade();
+        }
+
+        // Start 3-second auto-fade on initial load
+        startSplashAutoFade();
+
+        // ==================== SHARED TOAST & TAB NAVIGATION ====================
+        function showToast(msg) {
+            const toast = document.getElementById('toast-banner');
+            toast.textContent = msg;
+            toast.classList.remove('hidden');
+            clearTimeout(window.toastTimer);
+            window.toastTimer = setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2400);
+        }
+
+        function switchTab(tabName) {
+            initAudioContext();
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-emerald-400', 'bg-slate-900');
+                btn.classList.add('text-slate-400');
+            });
+
+            document.getElementById('tab-' + tabName).classList.add('active');
+            const activeBtn = document.getElementById('nav-' + tabName);
+            activeBtn.classList.remove('text-slate-400');
+            activeBtn.classList.add('text-emerald-400', 'bg-slate-900');
+        }
+
+        // ==================== 2. CALCULATOR (WITH LOCALSTORAGE & KEYBOARD) ====================
+        let currentInput = '0';
+        let expressionStr = '';
+        let historyList = JSON.parse(localStorage.getItem('bm_calc_history') || '[]');
+        let isHistoryOpen = false;
+
+        function updateCalcUI() {
+            document.getElementById('calc-display').textContent = currentInput;
+            document.getElementById('calc-expression').textContent = expressionStr;
+        }
+
+        function toggleCalcHistory() {
+            isHistoryOpen = !isHistoryOpen;
+            const box = document.getElementById('calc-history-box');
+            const chev = document.getElementById('history-chevron');
+            box.classList.toggle('hidden', !isHistoryOpen);
+            chev.style.transform = isHistoryOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+
+        function calcInput(val) {
+            const operators = ['+', '-', '*', '/', '%'];
+            if (currentInput === 'Error') currentInput = '0';
+
+            if (operators.includes(val)) {
+                const lastChar = currentInput.slice(-1);
+                if (operators.includes(lastChar)) {
+                    currentInput = currentInput.slice(0, -1) + val;
+                } else {
+                    currentInput += val;
+                }
+            } else if (val === '.') {
+                const parts = currentInput.split(/[\+\-\*\/\%\(\)]/);
+                const lastNum = parts[parts.length - 1];
+                if (!lastNum.includes('.')) {
+                    currentInput += '.';
+                }
+            } else {
+                if (currentInput === '0' && val !== '00') {
+                    currentInput = val;
+                } else if (currentInput === '0' && val === '00') {
+                    currentInput = '0';
+                } else {
+                    currentInput += val;
+                }
+            }
+            updateCalcUI();
+        }
+
+        function calcScientific(fn) {
+            try {
+                const val = parseFloat(currentInput);
+                if (isNaN(val)) return;
+                let res = 0;
+                if (fn === 'sqrt') {
+                    if (val < 0) throw new Error('Invalid');
+                    res = Math.sqrt(val);
+                    expressionStr = `√(${val})`;
+                } else if (fn === 'sq') {
+                    res = val * val;
+                    expressionStr = `(${val})²`;
+                }
+                const formatted = Number(Math.round(res + 'e8') + 'e-8').toString();
+                saveHistoryItem(expressionStr, formatted);
+                currentInput = formatted;
+                updateCalcUI();
+            } catch (e) {
+                currentInput = 'Error';
+                updateCalcUI();
+            }
+        }
+
+        function calcClear() {
+            currentInput = '0';
+            expressionStr = '';
+            updateCalcUI();
+        }
+
+        function calcBackspace() {
+            if (currentInput === 'Error' || currentInput.length <= 1) {
+                currentInput = '0';
+            } else {
+                currentInput = currentInput.slice(0, -1);
+            }
+            updateCalcUI();
+        }
+
+        function calcEquals() {
+            try {
+                let sanitized = currentInput.replace(/×/g, '*').replace(/÷/g, '/');
+                sanitized = sanitized.replace(/(\d+(\.\d+)?)%/g, '($1/100)');
+                if (!/^[0-9+\-*/().\s]+$/.test(sanitized)) throw new Error('Invalid');
+
+                const result = Function('"use strict";return (' + sanitized + ')')();
+                if (!isFinite(result) || isNaN(result)) throw new Error('Error');
+
+                const formattedResult = Number(Math.round(result + 'e8') + 'e-8').toString();
+                expressionStr = currentInput + ' =';
+                saveHistoryItem(currentInput, formattedResult);
+
+                currentInput = formattedResult;
+                updateCalcUI();
+            } catch (e) {
+                expressionStr = currentInput;
+                currentInput = 'Error';
+                updateCalcUI();
+            }
+        }
+
+        function saveHistoryItem(expr, res) {
+            historyList.unshift({ expr, res });
+            if (historyList.length > 20) historyList.pop();
+            localStorage.setItem('bm_calc_history', JSON.stringify(historyList));
+            renderCalcHistory();
+        }
+
+        function renderCalcHistory() {
+            const container = document.getElementById('calc-history-box');
+            document.getElementById('history-count').textContent = historyList.length;
+            if (historyList.length === 0) {
+                container.innerHTML = '<p class="text-[11px] text-slate-500 italic text-center py-1">Abhi koi hisab save nahi hai</p>';
+                return;
+            }
+            container.innerHTML = historyList.map(item => `
+                <div onclick="useHistoryResult('${item.res}')" class="cursor-pointer hover:bg-slate-800 px-2 py-1 rounded text-xs flex justify-between items-center">
+                    <span class="text-slate-400 truncate mr-2">${item.expr}</span>
+                    <span class="text-emerald-400 font-bold shrink-0">= ${item.res}</span>
+                </div>
+            `).join('');
+        }
+
+        function useHistoryResult(val) {
+            currentInput = val;
+            updateCalcUI();
+        }
+
+        function clearHistory() {
+            historyList = [];
+            localStorage.removeItem('bm_calc_history');
+            renderCalcHistory();
+            showToast('History clear kar di gayi');
+        }
+
+        // Physical Keyboard Support when Calculator Tab is active
+        document.addEventListener('keydown', (e) => {
+            if (!document.getElementById('tab-calc').classList.contains('active')) return;
+            if (document.activeElement.tagName === 'INPUT') return;
+            if (/^[0-9+\-*/.%()]$/.test(e.key)) {
+                e.preventDefault();
+                calcInput(e.key);
+            } else if (e.key === 'Enter' || e.key === '=') {
+                e.preventDefault();
+                calcEquals();
+            } else if (e.key === 'Backspace') {
+                e.preventDefault();
+                calcBackspace();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                calcClear();
+            }
+        });
+        renderCalcHistory();
+
+        // ==================== 3. ALARM CLOCK (12H/24H & WEB AUDIO) ====================
+        let alarms = JSON.parse(localStorage.getItem('bm_alarms') || '[]');
+        let is24Hour = false;
+        let audioCtx = null;
+        let alarmInterval = null;
+        let lastTriggeredMinute = '';
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playBeepPattern() {
+            initAudioContext();
+            const now = audioCtx.currentTime;
+            const notes = [587.33, 739.99, 880.00, 1174.66]; // D5, F#5, A5, D6
+            notes.forEach((freq, idx) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, now + idx * 0.13);
+                gain.gain.setValueAtTime(0.001, now + idx * 0.13);
+                gain.gain.exponentialRampToValueAtTime(0.35, now + idx * 0.13 + 0.03);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.13 + 0.12);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now + idx * 0.13);
+                osc.stop(now + idx * 0.13 + 0.13);
+            });
+        }
+
+        function testAlarmSound() {
+            playBeepPattern();
+            showToast('🔔 Alarm ringtone check!');
+        }
+
+        function startAlarmRingtone() {
+            stopAlarmRingtone();
+            playBeepPattern();
+            alarmInterval = setInterval(playBeepPattern, 1150);
+        }
+
+        function stopAlarmRingtone() {
+            if (alarmInterval) {
+                clearInterval(alarmInterval);
+                alarmInterval = null;
+            }
+        }
+
+        function toggleClockFormat() {
+            is24Hour = !is24Hour;
+            document.getElementById('clock-format-btn').textContent = is24Hour ? '24H Mode' : '12H Mode';
+            updateLiveClock();
+            renderAlarms();
+        }
+
+        function formatDisplayTime(time24) {
+            const [hStr, mStr] = time24.split(':');
+            let h = parseInt(hStr, 10);
+            if (is24Hour) {
+                return `${String(h).padStart(2, '0')}:${mStr}`;
+            }
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            return `${String(h).padStart(2, '0')}:${mStr} ${ampm}`;
+        }
+
+        function updateLiveClock() {
+            const now = new Date();
+            const rawHours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const currentHHMM = `${String(rawHours).padStart(2, '0')}:${minutes}`;
+
+            const ampmEl = document.getElementById('live-clock-ampm');
+            if (is24Hour) {
+                document.getElementById('live-clock-time').textContent = `${String(rawHours).padStart(2, '0')}:${minutes}:${seconds}`;
+                ampmEl.textContent = '';
+            } else {
+                const ampm = rawHours >= 12 ? 'PM' : 'AM';
+                const h12 = rawHours % 12 || 12;
+                document.getElementById('live-clock-time').textContent = `${String(h12).padStart(2, '0')}:${minutes}:${seconds}`;
+                ampmEl.textContent = ampm;
+            }
+
+            const options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
+            document.getElementById('live-clock-date').textContent = now.toLocaleDateString('en-IN', options);
+
+            if (now.getSeconds() === 0 && lastTriggeredMinute !== currentHHMM) {
+                const matched = alarms.find(a => a.enabled && a.time === currentHHMM);
+                if (matched) {
+                    lastTriggeredMinute = currentHHMM;
+                    triggerAlarmPopup(matched);
+                }
+            }
+        }
+        setInterval(updateLiveClock, 1000);
+        updateLiveClock();
+
+        function saveAlarms() {
+            localStorage.setItem('bm_alarms', JSON.stringify(alarms));
+            renderAlarms();
+        }
+
+        function addAlarm() {
+            initAudioContext();
+            const timeVal = document.getElementById('alarm-time-input').value;
+            const labelVal = document.getElementById('alarm-label-input').value.trim() || 'Bittu Mukhiya Alarm';
+
+            if (!timeVal) {
+                showToast('⚠️ Pehle time select karein!');
+                return;
+            }
+
+            alarms.push({
+                id: Date.now(),
+                time: timeVal,
+                label: labelVal,
+                enabled: true
+            });
+            alarms.sort((a, b) => a.time.localeCompare(b.time));
+            document.getElementById('alarm-label-input').value = '';
+            saveAlarms();
+            showToast(`⏰ Alarm set: ${formatDisplayTime(timeVal)}`);
+        }
+
+        function toggleAlarm(id) {
+            initAudioContext();
+            alarms = alarms.map(a => a.id === id ? { ...a, enabled: !a.enabled } : a);
+            saveAlarms();
+        }
+
+        function deleteAlarm(id) {
+            alarms = alarms.filter(a => a.id !== id);
+            saveAlarms();
+            showToast('Alarm delete ho gaya');
+        }
+
+        function renderAlarms() {
+            const listEl = document.getElementById('alarm-list');
+            document.getElementById('alarm-count').textContent = alarms.length;
+            document.getElementById('active-alarm-dot').classList.toggle('hidden', !alarms.some(a => a.enabled));
+
+            if (alarms.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-6 bg-slate-950/40 rounded-2xl border border-dashed border-slate-800">
+                        <p class="text-xs text-slate-400">Abhi koi alarm set nahi hai</p>
+                    </div>`;
+                return;
+            }
+
+            listEl.innerHTML = alarms.map(alarm => `
+                <div class="flex items-center justify-between p-3 rounded-2xl border transition ${alarm.enabled ? 'bg-slate-900 border-slate-700' : 'bg-slate-950/50 border-slate-800/50 opacity-55'}">
+                    <div>
+                        <div class="text-lg font-extrabold text-white tracking-tight">${formatDisplayTime(alarm.time)}</div>
+                        <div class="text-[11px] text-slate-400">${alarm.label}</div>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                        <button onclick="toggleAlarm(${alarm.id})" class="w-11 h-6 rounded-full p-0.5 transition-colors ${alarm.enabled ? 'bg-emerald-500' : 'bg-slate-700'}">
+                            <div class="w-5 h-5 rounded-full bg-white shadow transform transition-transform ${alarm.enabled ? 'translate-x-5' : 'translate-x-0'}"></div>
+                        </button>
+                        <button onclick="deleteAlarm(${alarm.id})" class="p-1.5 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function triggerAlarmPopup(alarm) {
+            document.getElementById('ringing-time').textContent = formatDisplayTime(alarm.time);
+            document.getElementById('ringing-label').textContent = alarm.label;
+            const modal = document.getElementById('alarm-ring-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            startAlarmRingtone();
+        }
+
+        function stopRingingAlarm() {
+            stopAlarmRingtone();
+            const modal = document.getElementById('alarm-ring-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function snoozeAlarm() {
+            stopRingingAlarm();
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + 5);
+            const snoozeTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            alarms.push({
+                id: Date.now(),
+                time: snoozeTime,
+                label: 'Snooze (5 min)',
+                enabled: true
+            });
+            saveAlarms();
+            showToast(`💤 5 min baad (${formatDisplayTime(snoozeTime)}) bajega`);
+        }
+
+        (function initDefaultAlarmInput() {
+            const d = new Date();
+            d.setMinutes(d.getMinutes() + 1);
+            document.getElementById('alarm-time-input').value = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        })();
+        renderAlarms();
+
+        // ==================== 4. LIVE GPS SPEEDOMETER & DEMO MODE ====================
+        let watchId = null;
+        let isTracking = false;
+        let isDemoMode = false;
+        let speedUnit = 'kmh';
+        let currentSpeedKmh = 0;
+        let maxSpeedKmh = 0;
+        let totalDistanceKm = 0;
+        let lastCoords = null;
+
+        function setSpeedUnit(unit) {
+            speedUnit = unit;
+            document.getElementById('unit-kmh').className = unit === 'kmh'
+                ? 'px-2.5 py-1 rounded-lg bg-indigo-600 text-white transition'
+                : 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition';
+            document.getElementById('unit-mph').className = unit === 'mph'
+                ? 'px-2.5 py-1 rounded-lg bg-indigo-600 text-white transition'
+                : 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition';
+
+            document.getElementById('speed-unit-label').textContent = unit === 'kmh' ? 'km/h' : 'mph';
+            document.querySelectorAll('.unit-mini').forEach(el => el.textContent = unit === 'kmh' ? 'km/h' : 'mph');
+            document.getElementById('dist-unit-mini').textContent = unit === 'kmh' ? 'km' : 'mi';
+            updateSpeedUI();
+        }
+
+        function convertSpeed(kmh) {
+            return speedUnit === 'kmh' ? kmh : kmh * 0.621371;
+        }
+
+        function convertDist(km) {
+            return speedUnit === 'kmh' ? km : km * 0.621371;
+        }
+
+        function updateSpeedUI() {
+            const dispSpeed = convertSpeed(currentSpeedKmh);
+            const dispMax = convertSpeed(maxSpeedKmh);
+            const dispDist = convertDist(totalDistanceKm);
+
+            document.getElementById('speed-value').textContent = Math.round(dispSpeed);
+            document.getElementById('max-speed-value').textContent = Math.round(dispMax);
+            document.getElementById('distance-value').textContent = dispDist.toFixed(2);
+
+            const maxScale = speedUnit === 'kmh' ? 180 : 120;
+            const ratio = Math.min(dispSpeed / maxScale, 1);
+            const arcLength = ratio * 433;
+            document.getElementById('speed-arc').setAttribute('stroke-dasharray', `${arcLength} 578`);
+        }
+
+        function handleDemoSlider(val) {
+            const num = parseFloat(val);
+            if (isTracking) stopSpeedTracking();
+
+            if (num > 0) {
+                isDemoMode = true;
+                document.getElementById('demo-badge').textContent = 'Test Active';
+                document.getElementById('demo-badge').className = 'text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold';
+                setGpsStatus('Demo Test Mode', 'green');
+                currentSpeedKmh = num;
+                if (num > maxSpeedKmh) maxSpeedKmh = num;
+                totalDistanceKm += num / 3600;
+            } else {
+                isDemoMode = false;
+                document.getElementById('demo-badge').textContent = 'Off';
+                document.getElementById('demo-badge').className = 'text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400';
+                setGpsStatus('GPS Off', 'gray');
+                currentSpeedKmh = 0;
+            }
+            updateSpeedUI();
+        }
+
+        function calcHaversineKm(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+        }
+
+        function toggleSpeedTracking() {
+            if (isTracking) {
+                stopSpeedTracking();
+            } else {
+                startSpeedTracking();
+            }
+        }
+
+        function startSpeedTracking() {
+            if (!('geolocation' in navigator)) {
+                showToast('Aapke browser mein GPS support nahi hai');
+                return;
+            }
+
+            // Reset demo slider if active
+            document.getElementById('demo-speed-slider').value = 0;
+            isDemoMode = false;
+            document.getElementById('demo-badge').textContent = 'Off';
+
+            isTracking = true;
+            const btn = document.getElementById('toggle-gps-btn');
+            btn.className = 'flex-1 py-3 rounded-2xl bg-gradient-to-r from-rose-600 to-orange-600 hover:opacity-95 active:scale-95 text-white font-bold text-sm shadow-lg shadow-rose-500/20 transition flex items-center justify-center gap-2';
+            document.getElementById('toggle-gps-text').textContent = 'Stop';
+            setGpsStatus('Connecting GPS...', 'yellow');
+
+            watchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const coords = position.coords;
+                    const acc = coords.accuracy ? Math.round(coords.accuracy) : null;
+                    setGpsStatus('GPS Active', 'green', acc ? `±${acc}m` : '');
+
+                    let speedMs = coords.speed;
+                    let kmh = (speedMs !== null && speedMs >= 0) ? speedMs * 3.6 : 0;
+
+                    if (lastCoords) {
+                        const distDelta = calcHaversineKm(
+                            lastCoords.latitude, lastCoords.longitude,
+                            coords.latitude, coords.longitude
+                        );
+                        if (distDelta > 0.003) {
+                            totalDistanceKm += distDelta;
+                            if (speedMs === null && lastCoords.timestamp) {
+                                const timeHours = (position.timestamp - lastCoords.timestamp) / 3600000;
+                                if (timeHours > 0) kmh = distDelta / timeHours;
+                            }
+                        }
+                    }
+
+                    lastCoords = {
+                        latitude: coords.latitude,
+                        longitude: coords.longitude,
+                        timestamp: position.timestamp
+                    };
+
+                    if (kmh < 1.2) kmh = 0;
+                    currentSpeedKmh = kmh;
+                    if (kmh > maxSpeedKmh) maxSpeedKmh = kmh;
+                    updateSpeedUI();
+                },
+                (err) => {
+                    setGpsStatus('GPS Error', 'red');
+                    showToast('Location permission allow karein ya Demo slider use karein');
+                },
+                { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
+            );
+        }
+
+        function stopSpeedTracking() {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            isTracking = false;
+            currentSpeedKmh = 0;
+            lastCoords = null;
+            updateSpeedUI();
+
+            const btn = document.getElementById('toggle-gps-btn');
+            btn.className = 'flex-1 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-emerald-500 hover:opacity-95 active:scale-95 text-white font-bold text-sm shadow-lg shadow-indigo-600/20 transition flex items-center justify-center gap-2';
+            document.getElementById('toggle-gps-text').textContent = 'Start Tracking';
+            setGpsStatus('GPS Off', 'gray');
+        }
+
+        function resetTripStats() {
+            currentSpeedKmh = 0;
+            maxSpeedKmh = 0;
+            totalDistanceKm = 0;
+            lastCoords = null;
+            document.getElementById('demo-speed-slider').value = 0;
+            document.getElementById('demo-badge').textContent = 'Off';
+            if (!isTracking) setGpsStatus('GPS Off', 'gray');
+            updateSpeedUI();
+            showToast('Speedometer reset ho gaya');
+        }
+
+        function setGpsStatus(text, color, accText = '') {
+            document.getElementById('gps-status-text').textContent = text;
+            const accEl = document.getElementById('gps-accuracy-text');
+            if (accText) {
+                accEl.textContent = `(${accText})`;
+                accEl.classList.remove('hidden');
+            } else {
+                accEl.classList.add('hidden');
+            }
+
+            const dot = document.getElementById('gps-dot');
+            const colors = {
+                green: 'bg-emerald-400 animate-pulse',
+                yellow: 'bg-amber-400 animate-ping',
+                red: 'bg-rose-500',
+                gray: 'bg-slate-500'
+            };
+            dot.className = `w-2 h-2 rounded-full ${colors[color] || colors.gray}`;
+        }
+    </script>
+</body>
+</html>
